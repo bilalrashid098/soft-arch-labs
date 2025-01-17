@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -33,11 +34,19 @@ public class LibraryController {
                 .collect(Collectors.toList());
     }
 
+    @Operation(summary = "Retrieve all books", description = "Returns a list of all books in the library as BookDto objects")
+    @GetMapping("/feature")
+    public List<BookDto> getFeaturedBooks() {
+        return bookService.getFeaturedBooks()
+                .stream()
+                .map(BookMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
     @Operation(summary = "Get a book by ID", description = "Provide an ID to lookup a specific book in the library")
     @GetMapping("/{id}")
-    public BookDto getBookById(@ApiParam("ID of the book to retrieve") @PathVariable Long id) {
-        //TODO
-        return new BookDto();
+    public Optional<Book> getBookById(@ApiParam("ID of the book to retrieve") @PathVariable Long id) {
+        return bookService.getBookById(id);
     }
 
     @Operation(summary = "Add a new book", description = "Adds a new book to the library and returns the saved BookDto object")
@@ -50,16 +59,16 @@ public class LibraryController {
 
     @Operation(summary = "Update an existing book", description = "Updates an existing book by ID with new information from the BookDto object")
     @PutMapping("/{id}")
-    public BookDto updateBook(
+    public Book updateBook(
             @ApiParam("ID of the book to update") @PathVariable Long id,
             @ApiParam( "Updated BookDto object") @RequestBody BookDto updatedBookDto) {
-        //TODO
-        return BookMapper.toDTO(new Book());
+        return bookService.updateBook(id, BookMapper.toEntity(updatedBookDto));
     }
 
     @Operation(summary = "Delete a book by ID", description = "Deletes the book with the specified ID from the library")
     @DeleteMapping("/{id}")
-    public void deleteBook(@ApiParam("ID of the book to delete") @PathVariable Long id) {
-    //TODO
+    public String deleteBook(@ApiParam("ID of the book to delete") @PathVariable Long id) {
+        bookService.deleteBook(id);
+        return null;
     }
 }
